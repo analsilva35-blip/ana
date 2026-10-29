@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EstudaFlow — Central de Alta Performance nos Estudos</title>
+  <meta name="description" content="Plataforma moderna, minimalista e focada em alta produtividade para estudantes organizarem disciplinas, cronogramas, pomodoro, flashcards e relatórios.">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></svg>">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <div class="brand-logo">
+          <i data-lucide="graduation-cap" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+          <div class="brand-title">
+            Estuda<span>Flow</span>
+            <span class="brand-badge">PRO</span>
+          </div>
+          <div class="brand-subtitle">Foco & Organização</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="nav-menu">
+        <button class="nav-item active" data-view="dashboard">
+          <div class="nav-item-left">
+            <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+            <span>Painel Geral</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-view="schedule">
+          <div class="nav-item-left">
+            <i data-lucide="calendar-days" style="width: 18px; height: 18px;"></i>
+            <span>Planejador & Grade</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-view="subjects">
+          <div class="nav-item-left">
+            <i data-lucide="book-open-check" style="width: 18px; height: 18px;"></i>
+            <span>Matérias & Edital</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-view="timer">
+          <div class="nav-item-left">
+            <i data-lucide="timer" style="width: 18px; height: 18px;"></i>
+            <span>Foco & Pomodoro</span>
+          </div>
+          <span id="sidebar-timer-badge" class="nav-badge-live" style="display: none;">Ativo</span>
+        </button>
+
+        <button class="nav-item" data-view="flashcards">
+          <div class="nav-item-left">
+            <i data-lucide="layers" style="width: 18px; height: 18px;"></i>
+            <span>Flashcards</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-view="analytics">
+          <div class="nav-item-left">
+            <i data-lucide="bar-chart-3" style="width: 18px; height: 18px;"></i>
+            <span>Estatísticas</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-view="settings">
+          <div class="nav-item-left">
+            <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+            <span>Configurações</span>
+          </div>
+        </button>
+      </nav>
+
+      <!-- Sidebar Streak Card -->
+      <div class="sidebar-streak-card">
+        <div class="streak-card-header">
+          <div class="streak-card-flame">
+            <i data-lucide="flame" style="width: 16px; height: 16px; fill: #f59e0b; stroke: #f59e0b;"></i>
+            <span id="sidebar-streak-text">0 dias seguidos</span>
+          </div>
+          <span id="sidebar-goal-percent" style="color: var(--primary);">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="sidebar-goal-bar" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--text-muted);">
+          <span id="sidebar-goal-hours">0h / 4h</span>
+          <span id="sidebar-goal-status">Em andamento</span>
+        </div>
+      </div>
+
+      <!-- Footer & Theme Toggle -->
+      <div class="sidebar-footer">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
+            EF
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 700;">Estudante</div>
+            <div style="font-size: 10px; color: var(--text-muted);">Modo Foco Ativo</div>
+          </div>
+        </div>
+
+        <button id="theme-toggle-btn" class="btn-icon" title="Alternar Modo Escuro / Claro">
+          <i data-lucide="moon" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-title-box">
+          <h1 id="header-view-title">Painel Geral</h1>
+          <p id="header-current-date">Carregando data...</p>
+        </div>
+
+        <div class="header-actions">
+          <!-- Streak Pill -->
+          <div class="streak-pill">
+            <i data-lucide="flame" style="width: 16px; height: 16px; fill: #f59e0b; stroke: #f59e0b;"></i>
+            <span id="header-streak-count">0 dias</span>
+          </div>
+
+          <!-- Quick Active Timer Pill -->
+          <button id="header-timer-pill" class="btn btn-secondary" style="display: none; padding: 6px 12px; font-size: 12px; border-radius: var(--radius-full);">
+            <i data-lucide="clock" style="width: 14px; height: 14px; stroke: var(--primary);"></i>
+            <span id="header-timer-digits" class="font-mono" style="font-weight: 700;">25:00</span>
+          </button>
+
+          <!-- New Task Quick Button -->
+          <button id="btn-open-task-modal" class="btn btn-primary" style="padding: 7px 14px;">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+            <span>Nova Tarefa</span>
+          </button>
+
+          <!-- Mobile Theme Toggle -->
+          <button id="mobile-theme-btn" class="btn-icon" style="display: none;">
+            <i data-lucide="moon" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body">
+        
+        <!-- VIEW 1: DASHBOARD -->
+        <section id="view-dashboard" class="view-section active">
+          <!-- Hero Banner -->
+          <div class="hero-banner">
+            <div class="hero-content">
+              <div>
+                <div class="hero-badge">
+                  <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+                  <span>Sua rotina no seu ritmo</span>
+                </div>
+                <h2 id="dashboard-hero-title" class="hero-title">Pronto para bater sua meta hoje? 🎯</h2>
+                <p id="dashboard-hero-desc" class="hero-desc">
+                  Mantenha a consistência diária e foque nas prioridades mais altas.
+                </p>
+              </div>
+
+              <div style="background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(8px); padding: 18px 24px; border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 16px;">
+                <i data-lucide="flame" style="width: 32px; height: 32px; fill: #fbbf24; stroke: #fbbf24;"></i>
+                <div>
+                  <div id="hero-streak-days" style="font-size: 1.5rem; font-weight: 800; color: white;">0 Dias</div>
+                  <div style="font-size: 12px; color: #fef08a;">Foco consecutivo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 KPIs Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Meta Diária</span>
+                <div class="kpi-icon-box" style="background: var(--primary-light); color: var(--primary);">
+                  <i data-lucide="clock" style="width: 16px; height: 16px;"></i>
+                </div>
+              </div>
+              <div id="kpi-study-hours" class="kpi-value">0.0h</div>
+              <p id="kpi-study-sub" style="font-size: 12px; color: var(--text-muted);">/ 4h planejadas</p>
+              <div class="progress-bar-bg" style="margin-top: 10px;">
+                <div id="kpi-goal-fill" class="progress-bar-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Tarefas Hoje</span>
+                <div class="kpi-icon-box" style="background: var(--success-light); color: var(--success);">
+                  <i data-lucide="check-circle-2" style="width: 16px; height: 16px;"></i>
+                </div>
+              </div>
+              <div id="kpi-tasks-done" class="kpi-value">0</div>
+              <p id="kpi-tasks-sub" style="font-size: 12px; color: var(--text-muted);">concluídas no dia</p>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Próximo Exame</span>
+                <div class="kpi-icon-box" style="background: var(--danger-light); color: var(--danger);">
+                  <i data-lucide="calendar" style="width: 16px; height: 16px;"></i>
+                </div>
+              </div>
+              <div id="kpi-next-exam-title" style="font-size: 0.95rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">Nenhum</div>
+              <p id="kpi-next-exam-time" style="font-size: 12px; font-weight: 700; color: var(--danger);">Sem provas agendadas</p>
+            </div>
+
+            <div class="kpi-card" style="background: linear-gradient(135deg, var(--primary-light), var(--info-light)); border-color: rgba(99,102,241,0.2);">
+              <div class="kpi-header" style="color: var(--primary);">
+                <span>Acesso Rápido</span>
+                <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+              </div>
+              <p style="font-size: 12px; color: var(--text-main); margin-bottom: 12px;">Iniciar ciclo de 25 min agora:</p>
+              <button id="btn-quick-start-pomodoro" class="btn btn-primary" style="width: 100%; font-size: 12px; padding: 8px;">
+                <i data-lucide="play" style="width: 14px; height: 14px; fill: white;"></i>
+                <span>Iniciar Pomodoro</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Split Columns: Tasks (Left) & Deadlines/Subjects (Right) -->
+          <div class="dashboard-split">
+            <!-- Left: Tasks -->
+            <div class="card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <h3 style="font-size: 1.1rem;">Tarefas de Estudo</h3>
+                  <p style="font-size: 12px;">Ações prioritárias para manter o ritmo acadêmico</p>
+                </div>
+                
+                <div style="display: flex; gap: 6px; background: var(--bg-surface-alt); padding: 4px; border-radius: var(--radius-md);">
+                  <button class="btn btn-secondary task-filter-btn active" data-filter="pendentes" style="padding: 4px 10px; font-size: 11px;">Pendentes</button>
+                  <button class="btn btn-secondary task-filter-btn" data-filter="concluidas" style="padding: 4px 10px; font-size: 11px;">Concluídas</button>
+                  <button class="btn btn-secondary task-filter-btn" data-filter="todas" style="padding: 4px 10px; font-size: 11px;">Todas</button>
+                </div>
+              </div>
+
+              <!-- Tasks List Container -->
+              <div id="dashboard-tasks-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Right: Upcoming Deadlines & Progress -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Deadlines card -->
+              <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                  <h3 style="font-size: 1rem; display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="calendar-check" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Próximas Datas e Provas
+                  </h3>
+                  <button class="nav-item-link" data-view="schedule" style="background: none; border: none; font-size: 11px; font-weight: 700; color: var(--primary); cursor: pointer;">Ver agenda &rarr;</button>
+                </div>
+                <div id="dashboard-deadlines-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <!-- Edital progress card -->
+              <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                  <h3 style="font-size: 1rem; display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="book-open" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                    Progresso no Edital
+                  </h3>
+                  <button class="nav-item-link" data-view="subjects" style="background: none; border: none; font-size: 11px; font-weight: 700; color: var(--primary); cursor: pointer;">Gerenciar &rarr;</button>
+                </div>
+                <div id="dashboard-subjects-progress-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: SCHEDULE -->
+        <section id="view-schedule" class="view-section">
+          <div class="card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; gap: 6px; background: var(--bg-surface-alt); padding: 4px; border-radius: var(--radius-md);">
+              <button id="tab-btn-weekly" class="btn btn-secondary active" style="font-size: 12px; padding: 6px 14px;">
+                <i data-lucide="calendar-days" style="width: 14px; height: 14px;"></i>
+                Grade Semanal
+              </button>
+              <button id="tab-btn-calendar" class="btn btn-secondary" style="font-size: 12px; padding: 6px 14px;">
+                <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                Calendário Acadêmico
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button id="btn-open-spaced-modal" class="btn btn-secondary" style="font-size: 12px; color: var(--info);">
+                <i data-lucide="repeat" style="width: 14px; height: 14px;"></i>
+                Agendar Revisão Espaçada
+              </button>
+              <button id="btn-schedule-action" class="btn btn-primary" style="font-size: 12px;">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span id="btn-schedule-action-text">Novo Bloco de Horário</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sub-view 1: Grade Semanal -->
+          <div id="schedule-sub-weekly" class="card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Grade Semanal de Estudos</h3>
+            <p style="font-size: 12px; margin-bottom: 20px;">Distribuição de horários por matéria de Segunda a Domingo</p>
+            <div class="timetable-grid" id="timetable-container">
+              <!-- Dynamically populated with 7 columns -->
+            </div>
+          </div>
+
+          <!-- Sub-view 2: Calendário Interativo -->
+          <div id="schedule-sub-calendar" class="card" style="display: none;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <h3 id="cal-month-title" style="font-size: 1.1rem; text-transform: capitalize;">Mês Atual</h3>
+                  <div style="display: flex; gap: 6px;">
+                    <button id="cal-prev-btn" class="btn-icon"><i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i></button>
+                    <button id="cal-today-btn" class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;">Hoje</button>
+                    <button id="cal-next-btn" class="btn-icon"><i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i></button>
+                  </div>
+                </div>
+
+                <!-- Days of week bar -->
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">
+                  <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
+                </div>
+
+                <!-- Month cells container -->
+                <div id="calendar-cells-grid" class="calendar-grid">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <!-- Day Details -->
+              <div style="border-left: 1px solid var(--border); padding-left: 20px;">
+                <h4 id="cal-selected-date-title" style="font-size: 0.95rem; margin-bottom: 12px;">Eventos da Data</h4>
+                <div id="cal-selected-events-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 3: SUBJECTS -->
+        <section id="view-subjects" class="view-section">
+          <div class="card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h3 style="font-size: 1.1rem;">Disciplinas & Edital Verticalizado</h3>
+              <p style="font-size: 12px;">Gerenciamento completo de matérias, tópicos e percentual de domínio</p>
+            </div>
+            <button id="btn-open-subject-modal" class="btn btn-primary" style="font-size: 12px;">
+              <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+              Nova Disciplina
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px;">
+            <!-- Left: Subjects List -->
+            <div id="subjects-card-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Right: Active Subject Topics -->
+            <div class="card" id="subject-detail-panel">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 4: TIMER (POMODORO & CRONÔMETRO) -->
+        <section id="view-timer" class="view-section">
+          <div class="card pomodoro-wrapper">
+            <!-- Mode Pills -->
+            <div style="display: inline-flex; gap: 6px; background: var(--bg-surface-alt); padding: 5px; border-radius: var(--radius-full); margin-bottom: 20px; flex-wrap: wrap; justify-content: center;">
+              <button class="btn btn-secondary timer-mode-btn active" data-mode="pomodoro" style="border-radius: var(--radius-full); font-size: 12px; padding: 6px 16px;">Pomodoro (25m)</button>
+              <button class="btn btn-secondary timer-mode-btn" data-mode="shortBreak" style="border-radius: var(--radius-full); font-size: 12px; padding: 6px 16px;">Pausa Curta (5m)</button>
+              <button class="btn btn-secondary timer-mode-btn" data-mode="longBreak" style="border-radius: var(--radius-full); font-size: 12px; padding: 6px 16px;">Pausa Longa (15m)</button>
+              <button class="btn btn-secondary timer-mode-btn" data-mode="stopwatch" style="border-radius: var(--radius-full); font-size: 12px; padding: 6px 16px;">Cronômetro Livre</button>
+            </div>
+
+            <!-- Linking Subject Selector -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 20px;">
+              <span style="font-size: 12px; color: var(--text-muted);">Vincular tempo a:</span>
+              <select id="timer-subject-select" class="form-select" style="width: auto; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-md);">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <!-- Circular SVG Ring -->
+            <div class="timer-ring-container">
+              <svg width="280" height="280" viewBox="0 0 280 280" style="transform: rotate(-90deg);">
+                <circle cx="140" cy="140" r="115" stroke="var(--border)" stroke-width="10" fill="none"></circle>
+                <circle id="timer-progress-ring" cx="140" cy="140" r="115" stroke="var(--primary)" stroke-width="10" fill="none"
+                  stroke-linecap="round" stroke-dasharray="722.56" stroke-dashoffset="0" style="transition: stroke-dashoffset 0.5s ease;"></circle>
+              </svg>
+
+              <div class="timer-center-content">
+                <div id="timer-display-digits" class="timer-digits">25:00</div>
+                <div id="timer-mode-label" class="timer-label">Foco Profundo</div>
+                <div id="timer-cycles-text" style="font-size: 11px; color: var(--primary); font-weight: 700; margin-top: 4px;">Ciclo #1</div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="timer-controls">
+              <button id="btn-timer-reset" class="btn btn-secondary" title="Reiniciar">
+                <i data-lucide="rotate-ccw" style="width: 18px; height: 18px;"></i>
+              </button>
+
+              <button id="btn-timer-toggle" class="btn btn-primary" style="padding: 14px 36px; font-size: 1rem; border-radius: var(--radius-full);">
+                <i id="btn-timer-icon" data-lucide="play" style="width: 20px; height: 20px; fill: white;"></i>
+                <span id="btn-timer-text">Iniciar Foco</span>
+              </button>
+
+              <button id="btn-timer-skip" class="btn btn-secondary" title="Pular Etapa">
+                <i data-lucide="skip-forward" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
+
+            <!-- Ambient Sound Generator -->
+            <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+              <span style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="volume-2" style="width: 16px; height: 16px; color: var(--primary);"></i>
+                Sons Ambientes:
+              </span>
+
+              <button class="btn btn-secondary ambient-btn" data-ambient="rain" style="font-size: 11px; padding: 5px 12px;">🌧️ Chuva Suave</button>
+              <button class="btn btn-secondary ambient-btn" data-ambient="white" style="font-size: 11px; padding: 5px 12px;">📻 Ruído Foco</button>
+              <button class="btn btn-secondary ambient-btn" data-ambient="waves" style="font-size: 11px; padding: 5px 12px;">🌊 Ondas do Mar</button>
+              <button id="btn-ambient-stop" class="btn btn-secondary" style="font-size: 11px; padding: 5px 10px; color: var(--danger); display: none;">Desligar</button>
+            </div>
+          </div>
+
+          <!-- Today's Sessions Log -->
+          <div class="card" style="max-width: 700px; margin: 24px auto 0;">
+            <h4 style="font-size: 0.95rem; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="check-circle" style="width: 16px; height: 16px; color: var(--success);"></i>
+              Sessões Registradas Hoje
+            </h4>
+            <div id="timer-today-sessions-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: FLASHCARDS -->
+        <section id="view-flashcards" class="view-section">
+          <div class="card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h3 style="font-size: 1.1rem;">Flashcards & Revisão Ativa</h3>
+              <p style="font-size: 12px;">Fixação rápida de conceitos-chave usando recordação ativa</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button id="btn-open-flashcard-modal" class="btn btn-secondary" style="font-size: 12px;">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                Novo Flashcard
+              </button>
+              <button id="btn-start-review-mode" class="btn btn-primary" style="font-size: 12px;">
+                <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+                Iniciar Revisão
+              </button>
+            </div>
+          </div>
+
+          <!-- Subject filter pills -->
+          <div id="flashcards-filter-pills" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px;">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Active Review Screen (When studying) -->
+          <div id="flashcard-study-container" class="card" style="display: none; max-width: 550px; margin: 0 auto; text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+              <span id="study-card-counter">Card 1 de 10</span>
+              <button id="btn-close-study-mode" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">Sair</button>
+            </div>
+
+            <!-- 3D Card Scene -->
+            <div class="flashcard-scene" id="flashcard-3d-box">
+              <div class="flashcard-card" id="flashcard-3d-inner">
+                <!-- Front -->
+                <div class="flashcard-face">
+                  <div style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;">Pergunta</div>
+                  <div id="study-front-text" style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: auto 0; padding: 20px 0;">Pergunta aqui</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Clique para virar 🔄</div>
+                </div>
+                <!-- Back -->
+                <div class="flashcard-face flashcard-back">
+                  <div style="font-size: 11px; font-weight: 700; color: var(--info); text-transform: uppercase;">Resposta</div>
+                  <div id="study-back-text" style="font-size: 1.05rem; font-weight: 600; color: var(--text-main); margin: auto 0; padding: 20px 0;">Resposta aqui</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Avalie seu desempenho abaixo:</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rating buttons -->
+            <div id="study-rating-buttons" style="display: none; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px;">
+              <button class="btn btn-secondary" id="btn-rate-hard" style="color: var(--danger); font-size: 12px; flex-direction: column;">
+                <strong>Difícil</strong>
+                <span style="font-size: 10px; opacity: 0.8;">Repetir logo</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-rate-good" style="color: var(--primary); font-size: 12px; flex-direction: column;">
+                <strong>Bom</strong>
+                <span style="font-size: 10px; opacity: 0.8;">Lembrei bem</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-rate-easy" style="color: var(--success); font-size: 12px; flex-direction: column;">
+                <strong>Fácil</strong>
+                <span style="font-size: 10px; opacity: 0.8;">Dominado!</span>
+              </button>
+            </div>
+            <button id="btn-reveal-answer" class="btn btn-secondary" style="width: 100%; margin-top: 14px;">Revelar Resposta</button>
+          </div>
+
+          <!-- Flashcards Grid (Regular View) -->
+          <div id="flashcards-grid-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- VIEW 6: ANALYTICS -->
+        <section id="view-analytics" class="view-section">
+          <div class="card" style="margin-bottom: 20px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Estatísticas & Relatórios de Produtividade</h3>
+            <p style="font-size: 12px;">Métricas consolidadas de horas estudadas, consistência e comparativos</p>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Total Estudado</span><i data-lucide="clock" style="width: 16px; height: 16px;"></i></div>
+              <div id="analytics-total-hours" class="kpi-value">0h</div>
+              <p id="analytics-sessions-count" style="font-size: 12px; color: var(--text-muted);">0 sessões</p>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Média Diária</span><i data-lucide="trending-up" style="width: 16px; height: 16px;"></i></div>
+              <div id="analytics-daily-avg" class="kpi-value" style="color: var(--success);">0h/dia</div>
+              <p style="font-size: 12px; color: var(--text-muted);">Últimos 7 dias</p>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Disciplina Líder</span><i data-lucide="award" style="width: 16px; height: 16px;"></i></div>
+              <div id="analytics-top-subject" class="kpi-value" style="font-size: 1.1rem; margin-top: 4px;">N/A</div>
+              <p id="analytics-top-hours" style="font-size: 12px; color: var(--text-muted);">0 horas dedicadas</p>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Consistência</span><i data-lucide="target" style="width: 16px; height: 16px;"></i></div>
+              <div id="analytics-consistency-percent" class="kpi-value" style="color: var(--primary);">0%</div>
+              <p style="font-size: 12px; color: var(--text-muted);">Cumprimento da meta</p>
+            </div>
+          </div>
+
+          <!-- Charts Grid -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <!-- Bar Chart: Daily study -->
+            <div class="card">
+              <h4 style="font-size: 1rem; margin-bottom: 4px;">Horas Estudadas nos Últimos 7 Dias</h4>
+              <p style="font-size: 12px; margin-bottom: 16px;">Volume diário comparado com a linha da meta</p>
+              <div id="chart-daily-container"></div>
+            </div>
+
+            <!-- Donut Chart: Subject distribution -->
+            <div class="card">
+              <h4 style="font-size: 1rem; margin-bottom: 4px;">Distribuição por Matéria</h4>
+              <p style="font-size: 12px; margin-bottom: 16px;">Proporção de tempo dedicada</p>
+              <div id="chart-donut-container"></div>
+            </div>
+          </div>
+
+          <!-- Grouped Bar Chart: Planned vs Real -->
+          <div class="card">
+            <h4 style="font-size: 1rem; margin-bottom: 4px;">Comparativo Semanal: Horas Planejadas vs. Horas Reais</h4>
+            <p style="font-size: 12px; margin-bottom: 16px;">Verifique se você atingiu a meta planejada de cada matéria</p>
+            <div id="chart-comparison-container"></div>
+          </div>
+        </section>
+
+        <!-- VIEW 7: SETTINGS -->
+        <section id="view-settings" class="view-section">
+          <div class="card" style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+            <div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Configurações do EstudaFlow</h3>
+              <p style="font-size: 12px;">Ajuste seus tempos de Pomodoro, metas de estudo e faça backup completo dos seus dados.</p>
+            </div>
+
+            <!-- Form -->
+            <form id="settings-form">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+                <div class="form-group">
+                  <label class="form-label">Meta Diária de Estudo (Horas)</label>
+                  <input type="number" id="setting-daily-goal" class="form-input" min="0.5" max="16" step="0.5" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tempo de Foco Pomodoro (Minutos)</label>
+                  <input type="number" id="setting-pomodoro-work" class="form-input" min="5" max="90" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Pausa Curta (Minutos)</label>
+                  <input type="number" id="setting-pomodoro-short" class="form-input" min="1" max="30" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Pausa Longa (Minutos)</label>
+                  <input type="number" id="setting-pomodoro-long" class="form-input" min="5" max="60" required>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                  <input type="checkbox" id="setting-sound-alerts" style="width: 16px; height: 16px; accent-color: var(--primary);">
+                  Ativar alarme sonoro relaxante ao término do cronômetro
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Salvar Preferências</button>
+            </form>
+
+            <!-- Backup & Data Management -->
+            <div style="padding-top: 24px; border-top: 1px solid var(--border);">
+              <h4 style="font-size: 0.95rem; margin-bottom: 4px;">Backup & Armazenamento Local</h4>
+              <p style="font-size: 12px; margin-bottom: 16px;">Seus dados ficam 100% salvos no seu navegador (LocalStorage).</p>
+
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button id="btn-export-backup" class="btn btn-secondary">
+                  <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                  Exportar Backup (Download JSON)
+                </button>
+
+                <label class="btn btn-secondary" style="cursor: pointer;">
+                  <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+                  Restaurar Backup (Upload JSON)
+                  <input type="file" id="input-import-backup" accept=".json" style="display: none;">
+                </label>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
+                <button id="btn-reset-demo" class="btn" style="background: none; border: none; font-size: 12px; color: var(--text-muted); cursor: pointer;">Restaurar Dados de Exemplo</button>
+                <button id="btn-clear-all" class="btn" style="background: none; border: none; font-size: 12px; color: var(--danger); cursor: pointer;">Limpar Todos os Dados</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-nav">
+      <button class="nav-item active" data-view="dashboard" style="flex-direction: column; align-items: center; gap: 2px; padding: 4px; font-size: 10px;">
+        <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+        <span>Início</span>
+      </button>
+      <button class="nav-item" data-view="schedule" style="flex-direction: column; align-items: center; gap: 2px; padding: 4px; font-size: 10px;">
+        <i data-lucide="calendar-days" style="width: 18px; height: 18px;"></i>
+        <span>Agenda</span>
+      </button>
+      <button class="nav-item" data-view="subjects" style="flex-direction: column; align-items: center; gap: 2px; padding: 4px; font-size: 10px;">
+        <i data-lucide="book-open-check" style="width: 18px; height: 18px;"></i>
+        <span>Matérias</span>
+      </button>
+      <button class="nav-item" data-view="timer" style="flex-direction: column; align-items: center; gap: 2px; padding: 4px; font-size: 10px;">
+        <i data-lucide="timer" style="width: 18px; height: 18px;"></i>
+        <span>Foco</span>
+      </button>
+      <button class="nav-item" data-view="flashcards" style="flex-direction: column; align-items: center; gap: 2px; padding: 4px; font-size: 10px;">
+        <i data-lucide="layers" style="width: 18px; height: 18px;"></i>
+        <span>Cards</span>
+      </button>
+      <button class="nav-item" data-view="analytics" style="flex-direction: column; align-items: center; gap: 2px; padding: 4px; font-size: 10px;">
+        <i data-lucide="bar-chart-3" style="width: 18px; height: 18px;"></i>
+        <span>Gráficos</span>
+      </button>
+      <button class="nav-item" data-view="settings" style="flex-direction: column; align-items: center; gap: 2px; padding: 4px; font-size: 10px;">
+        <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+        <span>Ajustes</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODAL: NOVA TAREFA -->
+  <div id="modal-task" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Nova Tarefa de Estudo</h3>
+        <button class="btn-icon modal-close-btn" data-modal="modal-task"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-new-task">
+          <div class="form-group">
+            <label class="form-label">Título da Tarefa</label>
+            <input type="text" id="task-input-title" class="form-input" placeholder="Ex: Resolver lista 4 de Integrais" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Disciplina</label>
+              <select id="task-input-subject" class="form-select"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prioridade</label>
+              <select id="task-input-priority" class="form-select">
+                <option value="alta">Alta 🔴</option>
+                <option value="media" selected>Média 🟡</option>
+                <option value="baixa">Baixa ⚪</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data Limite</label>
+            <input type="date" id="task-input-date" class="form-input">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary modal-close-btn" data-modal="modal-task">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Tarefa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO BLOCO NA GRADE -->
+  <div id="modal-slot" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Novo Bloco na Grade Semanal</h3>
+        <button class="btn-icon modal-close-btn" data-modal="modal-slot"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-new-slot">
+          <div class="form-group">
+            <label class="form-label">Dia da Semana</label>
+            <select id="slot-input-day" class="form-select">
+              <option value="1">Segunda-feira</option>
+              <option value="2">Terça-feira</option>
+              <option value="3">Quarta-feira</option>
+              <option value="4">Quinta-feira</option>
+              <option value="5">Sexta-feira</option>
+              <option value="6">Sábado</option>
+              <option value="0">Domingo</option>
+            </select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Horário Início</label>
+              <input type="time" id="slot-input-start" class="form-input" value="08:00" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Horário Término</label>
+              <input type="time" id="slot-input-end" class="form-input" value="10:00" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Disciplina</label>
+            <select id="slot-input-subject" class="form-select" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Atividade / Tópico (Opcional)</label>
+            <input type="text" id="slot-input-title" class="form-input" placeholder="Ex: Teoria e Resolução de Exercícios">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Local, Sala ou Link</label>
+            <input type="text" id="slot-input-room" class="form-input" placeholder="Ex: Sala 204 ou Biblioteca">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary modal-close-btn" data-modal="modal-slot">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Bloco</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO PRAZO / PROVA -->
+  <div id="modal-deadline" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Agendar Prova ou Prazo</h3>
+        <button class="btn-icon modal-close-btn" data-modal="modal-deadline"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-new-deadline">
+          <div class="form-group">
+            <label class="form-label">Título da Avaliação</label>
+            <input type="text" id="dl-input-title" class="form-input" placeholder="Ex: Prova P1 de Cálculo" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Data</label>
+              <input type="date" id="dl-input-date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo</label>
+              <select id="dl-input-type" class="form-select">
+                <option value="prova">Prova / Exame</option>
+                <option value="trabalho">Trabalho / Entrega</option>
+                <option value="revisao">Revisão Importante</option>
+                <option value="outro">Outro Prazo</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Disciplina</label>
+              <select id="dl-input-subject" class="form-select" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Peso / Obs</label>
+              <input type="text" id="dl-input-weight" class="form-input" placeholder="Ex: Peso 40%">
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary modal-close-btn" data-modal="modal-deadline">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar no Calendário</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REVISÃO ESPAÇADA -->
+  <div id="modal-spaced" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Ciclo de Revisão Espaçada (1 Clique)</h3>
+        <button class="btn-icon modal-close-btn" data-modal="modal-spaced"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; margin-bottom: 16px;">O sistema irá criar automaticamente 3 revisões no seu calendário: <strong>R1 (Amanhã)</strong>, <strong>R2 (7 dias)</strong> e <strong>R3 (30 dias)</strong>!</p>
+        <form id="form-new-spaced">
+          <div class="form-group">
+            <label class="form-label">Disciplina</label>
+            <select id="spaced-input-subject" class="form-select" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nome do Tópico Estudado</label>
+            <input type="text" id="spaced-input-title" class="form-input" placeholder="Ex: Artigo 5º da CF ou Integrais por Substituição" required>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary modal-close-btn" data-modal="modal-spaced">Cancelar</button>
+            <button type="submit" class="btn btn-primary" style="background-color: var(--info);">Gerar Revisões 24h, 7d e 30d</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA DISCIPLINA -->
+  <div id="modal-subject" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="subject-modal-title" style="font-size: 1.1rem;">Nova Disciplina</h3>
+        <button class="btn-icon modal-close-btn" data-modal="modal-subject"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-new-subject">
+          <input type="hidden" id="sub-edit-id">
+          <div class="form-group">
+            <label class="form-label">Nome da Disciplina</label>
+            <input type="text" id="sub-input-name" class="form-input" placeholder="Ex: Inteligência Artificial" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Professor (Opcional)</label>
+            <input type="text" id="sub-input-prof" class="form-input" placeholder="Ex: Prof. Silva">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Meta Horas/Semana</label>
+              <input type="number" id="sub-input-target" class="form-input" min="1" max="40" value="6" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cor de Identificação</label>
+              <input type="color" id="sub-input-color" class="form-input" value="#6366f1" style="height: 42px; padding: 4px; cursor: pointer;">
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary modal-close-btn" data-modal="modal-subject">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Disciplina</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO TÓPICO -->
+  <div id="modal-topic" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Novo Tópico de Conteúdo</h3>
+        <button class="btn-icon modal-close-btn" data-modal="modal-topic"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-new-topic">
+          <div class="form-group">
+            <label class="form-label">Título do Tópico</label>
+            <input type="text" id="topic-input-title" class="form-input" placeholder="Ex: Teorema de Bayes e Probabilidade Condicional" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Anotações / Referências</label>
+            <textarea id="topic-input-notes" class="form-textarea" rows="3" placeholder="Ex: Livro cap 3, fazer exercícios 1 a 10..."></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary modal-close-btn" data-modal="modal-topic">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Adicionar Tópico</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO FLASHCARD -->
+  <div id="modal-flashcard" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Novo Flashcard</h3>
+        <button class="btn-icon modal-close-btn" data-modal="modal-flashcard"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-new-flashcard">
+          <div class="form-group">
+            <label class="form-label">Disciplina</label>
+            <select id="fc-input-subject" class="form-select" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Frente (Pergunta ou Conceito)</label>
+            <textarea id="fc-input-front" class="form-textarea" rows="3" placeholder="Ex: O que é a notação Big-O?" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Verso (Resposta ou Definição)</label>
+            <textarea id="fc-input-back" class="form-textarea" rows="4" placeholder="Ex: É uma notação matemática para descrever o limite superior da complexidade de tempo ou espaço..." required></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary modal-close-btn" data-modal="modal-flashcard">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Flashcard</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts (100% Offline, Zero Server) -->
+  <script src="js/icons.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
